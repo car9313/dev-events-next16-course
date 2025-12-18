@@ -151,12 +151,17 @@ function generateSlug(title: string): string {
 
 // Helper function to normalize date to ISO format
 function normalizeDate(dateString: string): string {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-        throw new Error('Invalid date format');
-    }
-    return date.toISOString().split('T')[0]; // Return YYYY-MM-DD format
-}
+// If already in YYYY-MM-DD format, validate and return
+      const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (isoMatch) {
+          const [, year, month, day] = isoMatch;
+          const y = parseInt(year), m = parseInt(month), d = parseInt(day);
+          if (m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+              return dateString;
+          }
+      }
+    throw new Error('Invalid date format. Use YYYY-MM-DD');
+  }
 
 // Helper function to normalize time format
 function normalizeTime(timeString: string): string {
