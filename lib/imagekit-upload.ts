@@ -4,7 +4,8 @@ export async function uploadToImageKit(file: File): Promise<{ url: string; fileI
         const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
         const publicKey = process.env.IMAGEKIT_PUBLIC_KEY;
         const url_upload = process.env.IMAGEKIT_URL_UPLOAD;
-        if (!privateKey || !publicKey || url_upload) {
+
+        if (!privateKey || !publicKey || !url_upload) {
             throw new Error('ImageKit credentials missing');
         }
 

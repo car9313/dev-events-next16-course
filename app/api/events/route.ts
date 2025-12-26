@@ -1,45 +1,68 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
-import Event from "@/database/event.model";
+import Event, { IEvent } from "@/database/event.model";
 import { uploadToImageKit } from "../../../lib/imagekit-upload";
 
 export async function POST(req: NextRequest) {
-
     try {
         await connectDB();
         const formData = await req.formData();
-        const file = formData.get('image') as File;
-        if (!file) {
+        const title = formData.get('title');
+        const description = formData.get('description');
+        const date = formData.get('date');
+
+        if (!title || !description || !date) {
             return NextResponse.json(
-                { message: "Image file is required" },
+                { message: 'Missing required fields: title, description, and date are required' },
                 { status: 400 }
             );
         }
-        let event;
-        try {
-            event = Object.fromEntries(formData.entries());
-        } catch (e) {
-            return NextResponse.json({ message: 'Invalid JSON data format' }, { status: 400 });
+
+
+        // 1️⃣ Archivo
+        const file = formData.get('image');
+        if (!(file instanceof File)) {
+            return NextResponse.json(
+                { message: 'Image is required' },
+                { status: 400 }
+            );
         }
+
         const uploadResult = await uploadToImageKit(file);
-        const imageUrl = uploadResult.url;
-        const eventData: any = { ...event, image: imageUrl };
-        if (typeof eventData.agenda === 'string') {
-            try {
-                eventData.agenda = JSON.parse(eventData.agenda);
-            } catch (e) {
-                eventData.agenda = eventData.agenda.split('\n').filter((line: string) => line.trim());
-            }
-        }
-        if (typeof eventData.tags === 'string') {
-            try {
-                eventData.tags = JSON.parse(eventData.tags);
-            } catch (e) {
-                console.warn('No se pudo parsear tags como JSON, usando como array simple');
-                eventData.tags = eventData.tags.split(',').map((tag: string) => tag.trim());
-            }
-        }
-        const createdEvent = await Event.create(eventData);
+
+        // 2️⃣ Arrays (FORMA ÚNICA Y CLARA)
+        const agenda = formData
+            .getAll('agenda')
+            .filter(v => typeof v === 'string')
+            .map(v => v.trim())
+            .filter(Boolean);
+
+        const tags = formData
+            .getAll('tags')
+            .filter(v => typeof v === 'string')
+            .map(v => v.trim())
+            .filter(Boolean);
+
+        // 3️⃣ DTO (adaptador)
+        const eventDTO = {
+            title: title as string,
+            description: description as string,
+            overview: (formData.get('overview') as string) ?? '',
+            venue: (formData.get('venue') as string) ?? '',
+            location: (formData.get('location') as string) ?? '',
+            date: date as string,
+            time: (formData.get('time') as string) ?? '',
+            mode: (formData.get('mode') as string) ?? '',
+            audience: (formData.get('audience') as string) ?? '',
+            organizer: (formData.get('organizer') as string) ?? '',
+            image: uploadResult.url,
+            agenda,
+            tags
+        };
+
+        // 4️⃣ Persistencia (Domain + DB)
+        const createdEvent = await Event.create(eventDTO);
+
         return NextResponse.json(
             {
                 message: 'Event created successfully',
@@ -47,24 +70,17 @@ export async function POST(req: NextRequest) {
             },
             { status: 201 }
         );
+
     } catch (error: any) {
         return NextResponse.json(
             {
-                message: 'Event Creation Failed',
-                error: error.message,
-                // Solo en desarrollo mostrar detalles
-                ...(process.env.NODE_ENV === 'development' && {
-                    stack: error.stack,
-                    details: error.toString()
-                })
+                message: 'Event creation failed',
+                error: error.message
             },
             { status: 500 }
         );
-    } finally {
-        console.log('=== FIN POST /api/events ===');
     }
 }
-
 
 // Opcional: Agregar método GET para probar
 export async function GET(req: NextRequest) {
