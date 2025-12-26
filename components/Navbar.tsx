@@ -8,11 +8,11 @@ export default function Navbar() {
                 <Link href="/" className="logo">
                     <Image src="/icons/logo.png" alt="logo" width={24} height={24} />
                 </Link>
-          <ul>
-              <Link href="/">Home</Link>
-              <Link href="/">Events</Link>
-              <Link href="/">Create Event</Link>
-          </ul>
+                <ul>
+                    <Link href="/">Home</Link>
+                    <Link href="/">Events</Link>
+                    <Link href="/">Create Event</Link>
+                </ul>
             </nav>
         </header>
     )

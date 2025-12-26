@@ -106,6 +106,58 @@
   box-shadow: 0px 4px 40px 0px #00000066;
 }
 
+@layer utilities {
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out;
+  }
+
+  @keyframes fade-right-up {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-fade-right-up {
+    animation: fade-right-up 0.6s ease-out;
+  }
+
+  /* agregar animación de salida (fade out + scale) */
+  @keyframes fade-out-scale {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  .animate-fade-out-scale {
+    animation: fade-out-scale 0.4s ease-in forwards;
+  }
+}
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -140,7 +192,7 @@
   }
 
   #explore-btn {
-    @apply border-dark-200 bg-dark-100 flex w-fit cursor-pointer  rounded-full border px-8 py-3.5 max-sm:w-full text-center;
+    @apply border-dark-200 bg-dark-100 flex w-fit cursor-pointer rounded-full border px-8 py-3.5 max-sm:w-full text-center;
 
     a {
       @apply flex-center gap-2 text-center w-full;
