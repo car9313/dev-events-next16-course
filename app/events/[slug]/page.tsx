@@ -6,6 +6,8 @@ import EventAgenda from "../../../components/EventAgenda";
 import EventTags from "../../../components/EventTags";
 import BookEvent from "../../../components/BookEvent";
 import { Suspense } from "react";
+import { getSimilarEventsBySlug } from "../../../lib/actions/event.actions";
+import EventCard from "../../../components/EventCard";
 
 type RouteParams = {
     params: Promise<{ slug: string }>
@@ -16,8 +18,8 @@ export default async function EventDetailsPage({ params }: RouteParams) {
     let event;
     const { slug } = await params;
     const bookings = 10;
+    const similarEvents: IEvent[] = await getSimilarEventsBySlug(slug);
     try {
-
         const response = await fetch(`${BASE_URL}/api/events/${slug}`)
 
         if (!response.ok) {
@@ -31,6 +33,7 @@ export default async function EventDetailsPage({ params }: RouteParams) {
         event = data.event as IEvent
         console.log(event)
         if (!event) return notFound()
+
 
     } catch (error) {
         console.error('Error fetching event:', error);
@@ -99,6 +102,22 @@ export default async function EventDetailsPage({ params }: RouteParams) {
                             <BookEvent eventId={event._id.toString()} slug={event.slug} />
                         </div>
                     </aside>
+                </div>
+                <div className="flex w-full flex-col md:flex-row  gap-10 mt-20">
+                    {
+                        similarEvents.length > 0 && similarEvents.map(
+                            (similarEvent: IEvent) => (
+                                <EventCard key={similarEvent.title}
+                                    image={similarEvent.image}
+                                    title={similarEvent.title}
+                                    slug={similarEvent.slug}
+                                    location={similarEvent.location}
+                                    date={similarEvent.date}
+                                    time={similarEvent.time}
+                                />
+                            )
+                        )
+                    }
                 </div>
             </section>
         </Suspense>
