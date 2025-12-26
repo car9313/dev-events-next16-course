@@ -7,6 +7,17 @@ export async function POST(req: NextRequest) {
     try {
         await connectDB();
         const formData = await req.formData();
+        const title = formData.get('title');
+        const description = formData.get('description');
+        const date = formData.get('date');
+
+        if (!title || !description || !date) {
+            return NextResponse.json(
+                { message: 'Missing required fields: title, description, and date are required' },
+                { status: 400 }
+            );
+        }
+
 
         // 1️⃣ Archivo
         const file = formData.get('image');
@@ -34,16 +45,16 @@ export async function POST(req: NextRequest) {
 
         // 3️⃣ DTO (adaptador)
         const eventDTO = {
-            title: formData.get('title') as string,
-            description: formData.get('description') as string,
-            overview: formData.get('overview') as string,
-            venue: formData.get('venue') as string,
-            location: formData.get('location') as string,
-            date: formData.get('date') as string,
-            time: formData.get('time') as string,
-            mode: formData.get('mode') as string,
-            audience: formData.get('audience') as string,
-            organizer: formData.get('organizer') as string,
+            title: title as string,
+            description: description as string,
+            overview: (formData.get('overview') as string) ?? '',
+            venue: (formData.get('venue') as string) ?? '',
+            location: (formData.get('location') as string) ?? '',
+            date: date as string,
+            time: (formData.get('time') as string) ?? '',
+            mode: (formData.get('mode') as string) ?? '',
+            audience: (formData.get('audience') as string) ?? '',
+            organizer: (formData.get('organizer') as string) ?? '',
             image: uploadResult.url,
             agenda,
             tags
